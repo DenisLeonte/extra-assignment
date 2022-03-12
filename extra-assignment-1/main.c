@@ -43,9 +43,10 @@ void caesar_cypher_f(char* file_name, int key, int* err)
         *err = -1;
         return;
     }
-    char w[51];
     while(!feof(fptr))
-    {
+    {   
+        
+        char w[51] = {'\0'};
         fscanf(fptr,"%s",w);
         for(int i = 0;w[i] != '\0'; i++)
         {
@@ -70,7 +71,7 @@ void caesar_cypher_f(char* file_name, int key, int* err)
                 }
             }
         }
-        printf(" %s",w);
+        printf("%s ",w);
     }
     printf("\n");
     fclose(fptr);
@@ -80,7 +81,7 @@ void caesar_cypher_s(char* string, int key, int* err)
 {
     char temp_file_path[] = {"temp.txt"};
     FILE* fptr = fopen(temp_file_path,"w");
-    fwrite(string, 1, sizeof(string), fptr);
+    fputs(string, fptr);
     fclose(fptr);
     caesar_cypher_f(temp_file_path,key, err);
     if(*err != 0)
@@ -125,6 +126,8 @@ int main()
                 scanf("%d",&key);
                 key %= 26;
                 printf("Enter the string: ");
+                char buffer[2];
+                fgets(buffer,sizeof(buffer),stdin);
                 fgets(s,sizeof(s),stdin);
                 caesar_cypher_s(s,key, &err_code);
                 break;
