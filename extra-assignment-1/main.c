@@ -192,8 +192,26 @@ void caesar_decypher_f(char* ref_file, char* file, int* err)
         }
         shift(cyphered_table);
     }
-    printf("The best key was %d, the decyphered text is: \n\n",best_shift);
+    printf("The best key is %d, the decyphered text is: \n\n",best_shift);
     caesar_cypher_f(file, best_shift,err);
+}
+
+void caesar_decypher_s(char* string, char* ref, int *err)
+{
+    char temp_file_path[] = "temp.txt";
+    FILE* fptr = fopen(temp_file_path,"w");
+    fputs(string, fptr);
+    fclose(fptr);
+    caesar_decypher_f(ref, temp_file_path, err);
+    if(*err != 0)
+    {
+        return;
+    }
+    if(!remove(temp_file_path) == 0)
+    {
+        *err = -2;
+        return;
+    }
 }
 
 int main()
@@ -249,11 +267,13 @@ int main()
             {
                 char s[1001] = {'\0'}, ref[1001] = {'\0'};
                 printf("The string limit is 1000 characters\n");
+                char buffer[2];
+                fgets(buffer,sizeof(buffer),stdin);
                 printf("Enter the cyphered string: ");
                 fgets(s,sizeof(s),stdin);
                 printf("Enter the reference file name: ");
-                fgets(ref, sizeof(ref),stdin);
-                //caesar_decypher_s(s, ref);
+                scanf("%s",ref);
+                caesar_decypher_s(s, ref, &err_code);
                 break;
             }
             case 4:
