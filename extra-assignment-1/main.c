@@ -6,6 +6,7 @@
 #endif
 #include <stdio.h> //For console IO and file IO.
 #include <stdlib.h> //For system("clear")
+#include <math.h> //For pow()
 
 //This program will be tasked with cypering and decyphering the Caesar chyper.
 //The Caesar cypher takes a phrase and off-sets each letter by a key K.
@@ -15,7 +16,7 @@
 
 void pause()
 {
-    //Cross-platform way of pausing the program. This is required by me since im developing on a linux system
+    //Cross-platform way of pausing the program. This is required by me since im developing on a linux system.
     #ifdef _WIN32
         system("pause");
     #else
@@ -36,16 +37,18 @@ void clear()
 
 void caesar_cypher_f(char* file_name, int key, int* err)
 {
+    //Algoritm to cypher a file and return its cyphered contents on the terminal.
     *err = 0;
     FILE* fptr = fopen(file_name,"r");
     if(fptr == NULL)
     {
+        //Check if the file exists
         *err = -1;
         return;
     }
     while(!feof(fptr))
     {   
-        
+        //Here is the cyphering "per se"
         char w[51] = {'\0'};
         fscanf(fptr,"%s",w);
         for(int i = 0;w[i] != '\0'; i++)
@@ -53,11 +56,13 @@ void caesar_cypher_f(char* file_name, int key, int* err)
             int up = 0;
             if(w[i] >= 65 && w[i] <= 90)
             {
+                //Check for upper case and if true bring it to lower case for ease of use
                 up = 1;
                 w[i] += 32;
             }
             if(w[i] >= 97 && w[i] <= 122)
             {
+                //Cyphering here
                 int k = w[i] - 97;
                 k = (k + key) % 26;
                 if(k < 0)
@@ -67,38 +72,131 @@ void caesar_cypher_f(char* file_name, int key, int* err)
                 w[i] = k + 97;
                 if(up == 1)
                 {
+                    //If its upper case then bring it back to upper case
                     w[i] -= 32;
                 }
             }
         }
+        //Print the word
         printf("%s ",w);
     }
+    //Clean up
     printf("\n");
     fclose(fptr);
 }
 
 void caesar_cypher_s(char* string, int key, int* err)
 {
+    //Because I dont want to reinvent the wheel, I will use the file cyphering algorithm.
+    //Putting the string in a temp file.
     char temp_file_path[] = {"temp.txt"};
     FILE* fptr = fopen(temp_file_path,"w");
     fputs(string, fptr);
     fclose(fptr);
+    //Calling the file cyphering function with the temp file as parameter.
     caesar_cypher_f(temp_file_path,key, err);
+    //Error handling
     if(*err != 0)
     {
         return;
     }
     if(!remove(temp_file_path) == 0)
     {
+        //If temp cant be removed then call the error.
         *err = -2;
         return;
     }
+}
 
+void shift(int *arr)
+{
+    int temp = arr[sizeof(arr)];
+    for (int i = 24; i > 0; i++)
+    {
+        arr[i] = arr[i - 1];
+    }
+    arr[0] = temp;
+}
+
+float ci_square(float* ref_arr, float* cyp_arr)
+{
+    float s = 0.0f;
+    for(int i = 0; i < 26; i++)
+    {
+        s+= (float)(pow(cyp_arr[i] - ref_arr[i],2))/ref_arr[i];
+    }
+    return s;
+}
+
+void caesar_decypher_f(char* ref_file, char* file, int* err)
+{
+    //Get reference table.
+    float reference_table[26] = {0.0f};
+    FILE* fref = fopen(ref_file, "r");
+    if(fref == NULL)
+    {
+        *err = -1;
+        return;
+    }
+    for(int i = 0; i < 26; i++)
+    {
+        fscanf(fref,"%f",&reference_table[i]);
+    }
+    fclose(fref);
+    //Create reference table for the cyphered file.
+    int cyphered[26] = {0}, tot = 0;
+    FILE* fcip = fopen(file,"r");
+    if(fcip == NULL)
+    {
+        *err = -1;
+        return;
+    }
+    while(!feof(fcip))
+    {
+        char w[51] = {'\0'};
+        fscanf(fcip,"%s",w);
+        for(int i = 0; w[i] != '\0'; i++)
+        {
+            if(w[i] >= 65 && w[i] <= 90)
+            {
+                //Check for upper case and if true bring it to lower case for ease of use
+                w[i] += 32;
+            }
+            if(w[i] >= 97 && w[i] <= 122)
+            {
+                cyphered[w[i]-97]++;
+                tot++;
+            }
+        }
+    }
+    float cyphered_table[26] = {0.0f};
+    for(int i = 0; i < 26; i++)
+    {
+        cyphered_table[i] = (float)(100*cyphered[i])/tot;
+    }
+    //Recursively shift and call the ci-square function on the 2 tables.
+    int best_shift = 0;
+    float min_ci_sq = 0.0;
+    for(int i = 0; i < 25; i++)
+    {
+        float ci = ci_square(reference_table, cyphered_table);
+        if(min_ci_sq == 0.0)
+        {
+            min_ci_sq = ci;
+            best_shift = i;
+        }
+        else if (min_ci_sq > ci)
+        {
+            min_ci_sq = ci;
+            best_shift = i;
+        }
+    }
+    caesar_cypher_f(file, best_shift,err);
 }
 
 int main()
 {
-    //Main loop and UI handler
+    //Main loop and UI handler.
     int a = 1;
     while(a == 1)
     {
@@ -161,10 +259,10 @@ int main()
                 char s[1001] = {'\0'}, ref[1001] = {'\0'};
                 printf("The file name limit is 1000 characters\n");
                 printf("Enter the cyphered file name: ");
-                fgets(s,sizeof(s),stdin);
+                scanf("%s",s);
                 printf("Enter the reference file name: ");
-                fgets(ref, sizeof(ref),stdin);
-                //caesar_decypher_f(s, ref);
+                scanf("%s",ref);
+                caesar_decypher_f(ref, s, &err_code);
                 break;
             }
             default:
