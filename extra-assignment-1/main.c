@@ -56,7 +56,7 @@ int main()
             {
                 int key = 0;
                 char s[1001] = {'\0'};
-                printf("Please be aware that the key must be between 1 and 25. Any more than 25 will be looped and results wont be as predictable.\nThe string limit is 1000 characters\n");
+                printf("Please be aware that the key must be between -25 and 25. Any more or less than 25 will be looped and results wont be as predictable.\nThe string limit is 1000 characters\n");
                 printf("Enter the key: ");
                 scanf("%d",&key);
                 key %= 26;
@@ -69,29 +69,35 @@ int main()
             {
                 int key = 0;
                 char s[1001] = {'\0'};
-                printf("Please be aware that the key must be between 1 and 25. Any more than 25 will be looped and results wont be as predictable.\nThe file name limit is 1000 characters\n");
+                printf("Please be aware that the key must be between -25 and 25. Any more or less than 25 will be looped and results wont be as predictable.\nThe file name limit is 1000 characters\n");
                 printf("Enter the key: ");
                 scanf("%d",&key);
                 key %= 26;
-                printf("Enter the file name: ");
+                printf("Enter the string: ");
                 fgets(s,sizeof(s),stdin);
                 //caesar_cyper_f(s,key);
                 break;
             }
             case 3:
             {
-                char s[1001] = {'\0'};
+                char s[1001] = {'\0'}, ref[1001] = {'\0'};
                 printf("The string limit is 1000 characters\n");
+                printf("Enter the cyphered string: ");
                 fgets(s,sizeof(s),stdin);
-                //caesar_decypher_s(s);
+                printf("Enter the reference file name: ");
+                fgets(ref, sizeof(ref),stdin);
+                //caesar_decypher_s(s, ref);
                 break;
             }
             case 4:
             {
-                char s[1001] = {'\0'};
+                char s[1001] = {'\0'}, ref[1001] = {'\0'};
                 printf("The file name limit is 1000 characters\n");
+                printf("Enter the cyphered file name: ");
                 fgets(s,sizeof(s),stdin);
-                //caesar_decypher_f(s);
+                printf("Enter the reference file name: ");
+                fgets(ref, sizeof(ref),stdin);
+                //caesar_decypher_f(s, ref);
                 break;
             }
             default:
