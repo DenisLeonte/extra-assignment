@@ -34,6 +34,11 @@ void clear()
     #endif
 }
 
+void caesar_cypher_s(char* string, int key, int* err)
+{
+    
+}
+
 void caesar_cypher_f(char* file_name, int key, int* err)
 {
     *err = 0;
