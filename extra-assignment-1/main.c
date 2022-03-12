@@ -19,7 +19,7 @@ void pause()
     #ifdef _WIN32
         system("pause");
     #else
-        printf("Press any key to continue");
+        printf("Press any key to continue...\n");
         system("read");
     #endif
 }
@@ -32,11 +32,6 @@ void clear()
     #else
         system("clear");
     #endif
-}
-
-void caesar_cypher_s(char* string, int key, int* err)
-{
-    
 }
 
 void caesar_cypher_f(char* file_name, int key, int* err)
@@ -81,6 +76,25 @@ void caesar_cypher_f(char* file_name, int key, int* err)
     fclose(fptr);
 }
 
+void caesar_cypher_s(char* string, int key, int* err)
+{
+    char temp_file_path[] = {"temp.txt"};
+    FILE* fptr = fopen(temp_file_path,"w");
+    fwrite(string, 1, sizeof(string), fptr);
+    fclose(fptr);
+    caesar_cypher_f(temp_file_path,key, err);
+    if(*err != 0)
+    {
+        return;
+    }
+    if(!remove(temp_file_path) == 0)
+    {
+        *err = -2;
+        return;
+    }
+
+}
+
 int main()
 {
     //Main loop and UI handler
@@ -112,7 +126,7 @@ int main()
                 key %= 26;
                 printf("Enter the string: ");
                 fgets(s,sizeof(s),stdin);
-                //caesar_cypher_s(s,key);
+                caesar_cypher_s(s,key, &err_code);
                 break;
             }
             case 2:
@@ -125,7 +139,7 @@ int main()
                 key %= 26;
                 printf("Enter the file name: ");
                 fscanf(stdin," %s",s);
-                caesar_cypher_f(s,key,&err_code);
+                caesar_cypher_f(s,key, &err_code);
                 break;
             }
             case 3:
@@ -163,7 +177,9 @@ int main()
             case -1: //File not opened
                 printf("Error -1: inexistent file. Check for the file if it exists and check for spelling errors when inserting the file name in the program\n");
                 break;
-
+            case -2: //Unable to delete the temp file
+                printf("Error -2: unable to delete temp file. Check if you have administrator privileges running this program or contact the system administrator\n");
+                break;
         }
         pause();
     }
