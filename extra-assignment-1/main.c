@@ -1,9 +1,11 @@
 #ifdef _WIN32
 #define _CRT_SECURE_NO_WARNINGS //VS2022 requires this sometimes.
 #include <Windows.h> //system("pause"), system("cls")
+#else
+//UNIX includes here
 #endif
 #include <stdio.h> //For console IO and file IO.
-#include <stdlib.h> //For system("clr")
+#include <stdlib.h> //For system("clear")
 
 //This program will be tasked with cypering and decyphering the Caesar chyper.
 //The Caesar cypher takes a phrase and off-sets each letter by a key K.
@@ -17,8 +19,8 @@ void pause()
     #ifdef _WIN32
         system("pause");
     #else
-        int c = getchar();
-        c+=2; //Just to do anything with it
+        printf("Press any key to continue");
+        system("read");
     #endif
 }
 
@@ -32,8 +34,51 @@ void clear()
     #endif
 }
 
+void caesar_cypher_f(char* file_name, int key, int* err)
+{
+    *err = 0;
+    FILE* fptr = fopen(file_name,"r");
+    if(fptr == NULL)
+    {
+        *err = -1;
+        return;
+    }
+    char w[51];
+    while(!feof(fptr))
+    {
+        fscanf(fptr,"%s",w);
+        for(int i = 0;w[i] != '\0'; i++)
+        {
+            int up = 0;
+            if(w[i] >= 65 && w[i] <= 90)
+            {
+                up = 1;
+                w[i] += 32;
+            }
+            if(w[i] >= 97 && w[i] <= 122)
+            {
+                int k = w[i] - 97;
+                k = (k + key) % 26;
+                if(k < 0)
+                {
+                    k += 26;
+                }
+                w[i] = k + 97;
+                if(up == 1)
+                {
+                    w[i] -= 32;
+                }
+            }
+        }
+        printf(" %s",w);
+    }
+    printf("\n");
+    fclose(fptr);
+}
+
 int main()
 {
+    //Main loop and UI handler
     int a = 1;
     while(a == 1)
     {
@@ -43,7 +88,7 @@ int main()
         printf("3. De-cypher a string(SUCCESS IS NOT GUARANTEED)\n");
         printf("4. De-cypher a file(SUCCESS IS NOT GUARANTEED)\n");
         printf("0. Exit\n");
-        int opt = -1;
+        int opt = -1,err_code = 0;
         scanf("%d",&opt);
         clear();
         switch(opt)
@@ -62,7 +107,7 @@ int main()
                 key %= 26;
                 printf("Enter the string: ");
                 fgets(s,sizeof(s),stdin);
-                //caesar_cyper_s(s,key);
+                //caesar_cypher_s(s,key);
                 break;
             }
             case 2:
@@ -73,9 +118,9 @@ int main()
                 printf("Enter the key: ");
                 scanf("%d",&key);
                 key %= 26;
-                printf("Enter the string: ");
-                fgets(s,sizeof(s),stdin);
-                //caesar_cyper_f(s,key);
+                printf("Enter the file name: ");
+                fscanf(stdin," %s",s);
+                caesar_cypher_f(s,key,&err_code);
                 break;
             }
             case 3:
@@ -104,6 +149,16 @@ int main()
             {
                 printf("Incorrect choice\n");
             }
+        }
+        //Error code handler
+        switch(err_code)
+        {
+            case 0: //No error
+                break;
+            case -1: //File not opened
+                printf("Error -1: inexistent file. Check for the file if it exists and check for spelling errors when inserting the file name in the program\n");
+                break;
+
         }
         pause();
     }
