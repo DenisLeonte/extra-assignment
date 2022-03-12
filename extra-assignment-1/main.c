@@ -108,10 +108,10 @@ void caesar_cypher_s(char* string, int key, int* err)
     }
 }
 
-void shift(int *arr)
+void shift(float *arr)
 {
-    int temp = arr[sizeof(arr)];
-    for (int i = 24; i > 0; i++)
+    float temp = arr[25];
+    for (int i = 25; i > 0; i--)
     {
         arr[i] = arr[i - 1];
     }
@@ -190,7 +190,9 @@ void caesar_decypher_f(char* ref_file, char* file, int* err)
             min_ci_sq = ci;
             best_shift = i;
         }
+        shift(cyphered_table);
     }
+    printf("The best key was %d, the decyphered text is: \n\n",best_shift);
     caesar_cypher_f(file, best_shift,err);
 }
 
