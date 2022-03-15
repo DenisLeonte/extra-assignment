@@ -142,7 +142,6 @@ void caesar_decypher_f(char* ref_file, char* file, int* err)
     {
         fscanf(fref,"%f",&reference_table[i]);
     }
-    fclose(fref);
     //Create reference table for the cyphered file.
     int cyphered[26] = {0}, tot = 0;
     FILE* fcip = fopen(file,"r");
@@ -169,6 +168,7 @@ void caesar_decypher_f(char* ref_file, char* file, int* err)
             }
         }
     }
+    //Creating the cyphered table
     float cyphered_table[26] = {0.0f};
     for(int i = 0; i < 26; i++)
     {
@@ -179,6 +179,7 @@ void caesar_decypher_f(char* ref_file, char* file, int* err)
     float min_ci_sq = 0.0;
     for(int i = 0; i < 25; i++)
     {
+        //Computing the ci square of the tables.
         float ci = ci_square(reference_table, cyphered_table);
         if(min_ci_sq == 0.0)
         {
@@ -190,14 +191,19 @@ void caesar_decypher_f(char* ref_file, char* file, int* err)
             min_ci_sq = ci;
             best_shift = i;
         }
+        //Shifting the cyphered table to the right by 1 position.
         shift(cyphered_table);
     }
     printf("The best key is %d, the decyphered text is: \n\n",best_shift);
     caesar_cypher_f(file, best_shift,err);
+    //Cleaning up
+    fclose(fcip);
+    fclose(fref);
 }
 
 void caesar_decypher_s(char* string, char* ref, int *err)
 {
+    //Its the same concept as the string cyphering algorithm. I will put the cyphered string in a temp file and use caesar_decypher_f to decypher it.
     char temp_file_path[] = "temp.txt";
     FILE* fptr = fopen(temp_file_path,"w");
     fputs(string, fptr);
@@ -220,6 +226,7 @@ int main()
     int a = 1;
     while(a == 1)
     {
+        //Menu
         clear();
         printf("1. Cypher a string\n");
         printf("2. Cypher a file\n");
